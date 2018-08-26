@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="15 minutes">
+
+    <property resource="application.properties" />
+    <property name="contextName" value="${spring.application.name}"/>
+
+    <appender name="spring" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>../logs/${contextName}_spring_logs.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>../logs/${contextName}_spring_logs_%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{dd-MM-yyy HH:mm:ss} %-5level -> %mdc{generatedToken} %class{0}.%method\(%L\) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="monitor" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>../logs/${contextName}_monitor_logs.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>../logs/${contextName}_monitor_logs_%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{dd-MM-yyy HH:mm:ss} %-5msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="controllerLogger" level="ALL" additivity="false">
+        <appender-ref ref="spring" />
+    </logger>
+
+    <logger name="monitorLogger" level="ALL" additivity="false">
+        <appender-ref ref="monitor" />
+    </logger>
+
+</configuration>

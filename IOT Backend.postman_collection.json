@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "3c770c44-f00f-4bdd-86f2-6f4c0c600b01",
+		"name": "IOT Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authorize",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7091f5d5-37d5-4252-9185-86866ce03ce5",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"generatedToken\", jsonData.result.device.generatedToken);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "platform",
+						"value": "android"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"deviceId\": \"123-test\",\n  \"fcmToken\": \"test\"\n}"
+				},
+				"url": {
+					"raw": "{{apihost}}/authorize.json",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"authorize.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getNotificationList",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c15e16fd-ed03-4762-8db8-0d4055368722",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-token",
+						"value": "{{generatedToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"deviceId\":\"123-test\"}"
+				},
+				"url": {
+					"raw": "{{apihost}}/api/getNotificationList.json",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"getNotificationList.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "configure",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c15e16fd-ed03-4762-8db8-0d4055368722",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-token",
+						"value": "{{generatedToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"active\": true,\n  \"name\": \"burak\"\n}"
+				},
+				"url": {
+					"raw": "{{apihost}}/api/configure.json",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"configure.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{apihost}}/registerThings.json?deviceId=123-test",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"registerThings.json"
+					],
+					"query": [
+						{
+							"key": "deviceId",
+							"value": "123-test"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sendNotification",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c15e16fd-ed03-4762-8db8-0d4055368722",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-token",
+						"value": "{{generatedToken}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "img",
+							"description": "",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{apihost}}/api/sendNotification.json",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"sendNotification.json"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
