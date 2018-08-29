@@ -82,8 +82,10 @@ public class Device implements Serializable {
         this.fcmTokenList = fcmTokenList;
     }
 
-    public void addFcmTokenList(String fcmToken) {
-        fcmTokenList.add(fcmToken);
+     public void addFcmTokenList(String fcmToken) {
+       if (!fcmTokenList.contains(fcmToken)) {
+            fcmTokenList.add(fcmToken);
+        }
     }
 
     @Override
