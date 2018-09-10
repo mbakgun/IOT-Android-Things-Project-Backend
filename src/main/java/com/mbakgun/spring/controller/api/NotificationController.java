@@ -4,9 +4,11 @@ import com.google.gson.reflect.TypeToken;
 import com.mbakgun.spring.controller.AbstractController;
 import com.mbakgun.spring.model.Device;
 import com.mbakgun.spring.model.Notification;
+import com.mbakgun.spring.request.DeleteNotificationRequest;
 import com.mbakgun.spring.service.AsyncService.AsyncService;
 import com.mbakgun.spring.util.CommonFunction;
 import com.mbakgun.spring.util.constants.ResponseConstant;
+import com.mbakgun.spring.util.exception.MbaException;
 import com.mbakgun.spring.util.network.RequestContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,10 +36,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import static com.mbakgun.spring.util.constants.ControllerConstant.CONTROLLER_HEADERS;
 import static com.mbakgun.spring.util.constants.ControllerConstant.CONTROLLER_JSON_PRODUCES;
+import static com.mbakgun.spring.util.constants.ControllerConstant.DELETE_NOTIFICATION;
 import static com.mbakgun.spring.util.constants.ControllerConstant.GET_NOTIFICATION_LIST;
 import static com.mbakgun.spring.util.constants.ControllerConstant.SEND_NOTIFICATION;
 import static com.mbakgun.spring.util.constants.GenericConstant.REDIS_PREFIX_DEVICE;
 import static com.mbakgun.spring.util.constants.GenericConstant.REDIS_PREFIX_NOTIFICATION;
+import static com.mbakgun.spring.util.constants.ResponseConstant.DELETE_OPERATION;
 import static com.mbakgun.spring.util.constants.ResponseConstant.NOTIFICATION_LIST;
 
 @RestController
@@ -106,6 +111,39 @@ public class NotificationController extends AbstractController {
             if (!notificationMap.isEmpty()) {
                 ArrayList notificationList = new ArrayList(notificationMap.values());
                 responseBody.put(NOTIFICATION_LIST, notificationList);
+            }
+        }
+        return prepareSuccessResponse(HttpStatus.OK.value(), ResponseConstant.SUCCESS_MESSAGE,
+                responseBody);
+    }
+
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST, value = DELETE_NOTIFICATION, headers = CONTROLLER_HEADERS, produces = CONTROLLER_JSON_PRODUCES)
+    public Object deleteNotificationRequest(@RequestBody String requestBody, HttpServletRequest request) {
+        Map<String, Object> responseBody = new HashMap();
+        RequestContext context = RequestContext.getContext();
+        String generatedToken = context.getGeneratedToken();
+        String deviceId = redisService.getDeviceId(generatedToken);
+        if (StringUtils.isEmpty(deviceId)) {
+            logger.info("DEVICE ID NOT EXIST:" + generatedToken);
+            return prepareErrorResponse(401, "unauthorized");
+        } else {
+            try {
+                DeleteNotificationRequest deleteNotificationRequest = DeleteNotificationRequest.convertRequestBodyToDeleteNotificationRequestModel(requestBody);
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+                Date sentDate = deleteNotificationRequest.getSentDate();
+                String fileNameDb = deviceId + '@' + formatter.format(sentDate);
+                Notification notification = redisService.getObject(REDIS_PREFIX_NOTIFICATION, fileNameDb, TypeToken.get(Notification.class));
+                if (notification != null) {
+                    String imageUrl = notification.getImageUrl();
+                    asyncService.deleteFileAsync(path + imageUrl.substring(imageUrl.indexOf(deviceId)));
+                    responseBody.put(DELETE_OPERATION, redisService.deleteObject(REDIS_PREFIX_NOTIFICATION, fileNameDb));
+                } else {
+                    responseBody.put(DELETE_OPERATION, false);
+                }
+            } catch (MbaException e) {
+                logger.error(e.getMessage(), e);
+                return prepareErrorResponse(400, "bad request");
             }
         }
         return prepareSuccessResponse(HttpStatus.OK.value(), ResponseConstant.SUCCESS_MESSAGE,

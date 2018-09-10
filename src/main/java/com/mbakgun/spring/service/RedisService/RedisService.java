@@ -5,6 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import java.util.Map;
 
 public interface RedisService {
+    boolean isExist(String path);
+
     boolean isExist(String keyPrefix, String UUID);
 
     String getDeviceId(String generatedToken);
@@ -16,4 +18,6 @@ public interface RedisService {
     <T> T getObject(String keyPrefix, String key, TypeToken objectClass);
 
     Map<String, Object> getMapForKey(String keyPrefix, String key, TypeToken objectClass);
+
+    boolean deleteObject(String prefix, String key);
 }

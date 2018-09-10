@@ -20,23 +20,33 @@ public class RedisServiceImpl extends AbstractServiceImpl implements RedisServic
     @Autowired
     private StringRedisTemplate redis;
 
+    @Override
+    public boolean isExist(String path) {
+        return redis.hasKey(path);
+    }
+
+    @Override
     public boolean isExist(String keyPrefix, String UUID) {
         return redis.hasKey(keyPrefix + ":" + UUID);
     }
 
+    @Override
     public String getDeviceId(String generatedToken) {
         return redis.opsForValue().get(REDIS_PREFIX_TOKEN + ":" + generatedToken);
     }
 
+    @Override
     public void saveObject(Object savingObject, String keyPrefix, String key) {
         Gson gson = new Gson();
         redis.opsForValue().set(keyPrefix + ":" + key, gson.toJson(savingObject));
     }
 
+    @Override
     public void saveValue(String keyPrefix, String key, String value) {
         redis.opsForValue().set(keyPrefix + ":" + key, value);
     }
 
+    @Override
     public <T> T getObject(String keyPrefix, String key, TypeToken objectClass) {
         String object = redis.opsForValue().get(keyPrefix + ":" + key);
         if (!StringUtils.isEmpty(object)) {
@@ -46,6 +56,7 @@ public class RedisServiceImpl extends AbstractServiceImpl implements RedisServic
         return null;
     }
 
+    @Override
     public Map<String, Object> getMapForKey(String keyPrefix, String key, TypeToken objectClass) {
         Map<String, Object> map = new HashMap();
         Set<String> keys = redis.keys(keyPrefix + ":" + key + "*");
@@ -53,5 +64,11 @@ public class RedisServiceImpl extends AbstractServiceImpl implements RedisServic
             map.put(catchKey, getObject(keyPrefix, catchKey.replaceAll((keyPrefix + ':'), ""), objectClass));
         }
         return map;
+    }
+
+    @Override
+    public boolean deleteObject(String keyPrefix, String key) {
+        redis.delete(keyPrefix + ':' + key);
+        return !isExist(keyPrefix, key);
     }
 }

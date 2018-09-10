@@ -39,4 +39,11 @@ public class AsyncServiceImpl extends AbstractServiceImpl implements AsyncServic
             logger.error(e.getMessage(), e);
         }
     }
+
+    @Async("processExecutor")
+    @Override
+    public void deleteFileAsync(String path) {
+        File file = new File(path);
+        logger.info((String.format("Del(%s) : ", path) + file.delete()));
+    }
 }
